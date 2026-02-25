@@ -42,6 +42,7 @@ const Voterinfo: React.FC<VoterinfoProps> = ({ parcelID, myYear }) => {
             }
 
             const zoningUrl = `https://gismaps.fultoncountyga.gov/arcgispub/rest/services/Temp/GlobalSearch_Dialog/MapServer/3/query?f=json&where=ParcelID='${parcel}'&outFields=*`;
+            console.log("Zoning URL: " + zoningUrl);
             const zoningResponse = await fetch(zoningUrl);
             if (!zoningResponse.ok) {
                 throw new Error('Network response was not ok');

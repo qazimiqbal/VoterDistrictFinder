@@ -6,7 +6,9 @@ import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import { loadModules } from "esri-loader";
 import loadingAnimate from "./images/loading_animated.gif";
 import "./widgets.css";
-import Voterinfo from "./Voterinfo";
+import SearchPanel from "./components/SearchPanel";
+import ResultsArea from "./components/ResultsArea";
+import { suffixEntries } from "./constants/suffixEntries";
 
 
 
@@ -228,263 +230,6 @@ export default class Widget extends React.PureComponent<
 
     const rawSuffix = tokens[tokens.length - 1];
     const suffixKey = rawSuffix.replace(/[^A-Za-z0-9]/g, "").toUpperCase();
-
-    const suffixEntries: Array<[string, string]> = [
-      ["APPROACH", "App"],
-      ["GATE", "Gt"],
-      ["TURN", "Tn"],
-      ["ENTRANCE", "Ent"],
-      ["ENTRY", "Enrty"],
-      ["WAKE", "Wk"],
-      ["COPSE", "Cps"],
-      ["EDGE", "Edge"],
-      ["NOOK", "Nk"],
-      ["LOCH", "Lch"],
-      ["VINE", "Vine"],
-      ["PLANTATION", "Plantn"],
-      ["HALL", "Hall"],
-      ["CUT", "Cut"],
-      ["BOW", "Bow"],
-      ["BANK", "Bnk"],
-      ["MINOR", "Minor"],
-      ["GATES", "Gtes"],
-      ["PEAK", "Peak"],
-      ["LINKS", "Lnks"],
-      ["END", "End"],
-      ["OVERVIEW", "Ovrvw"],
-      ["WOODS", "Wds"],
-      ["CHATEAU", "Chat"],
-      ["HIGHLANDS", "Hlnds"],
-      ["ROWE", "Rowe"],
-      ["BAY", "Bay"],
-      ["CONNECTION", "Contn"],
-      ["FARM", "Frm"],
-      ["POND", "Pnd"],
-      ["RESERVE", "Res"],
-      ["TARN", "Tarn"],
-      ["RACEWAY", "Rcwy"],
-      ["LOOK", "Look"],
-      ["REACH", "Rch"],
-      ["VALE", "Vale"],
-      ["BROW", "Brw"],
-      ["SLOPE", "Slp"],
-      ["WYND", "Wynd"],
-      ["HEATH", "Hth"],
-      ["EXCHANGE", "Exg"],
-      ["CONCOURSE", "Con"],
-      ["LOOKOUT", "Lkt"],
-      ["CHASE", "Chs"],
-      ["CLOSE", "Clse"],
-      ["CONNECTOR", "Conn"],
-      ["PARKWAY", "Pky"],
-      ["WALK", "Wlk"],
-      ["POINTE", "Pte"],
-      ["ALLEY", "Aly"],
-      ["ANNEX", "Anx"],
-      ["ARCADE", "Arc"],
-      ["AVENUE", "Ave"],
-      ["BAYOO", "Byu"],
-      ["BEACH", "Bch"],
-      ["BEND", "Bnd"],
-      ["BLUFF", "Blf"],
-      ["BLUFFS", "Blfs"],
-      ["BOTTOM", "Btm"],
-      ["BOULEVARD", "Blvd"],
-      ["BRANCH", "Br"],
-      ["BRIDGE", "Brg"],
-      ["BROOK", "Brk"],
-      ["BROOKS", "Brks"],
-      ["BURG", "Bg"],
-      ["BURGS", "Bgs"],
-      ["BYPASS", "Byp"],
-      ["CAMP", "Cp"],
-      ["CANYON", "Cyn"],
-      ["CAPE", "Cpe"],
-      ["CAUSEWAY", "Cswy"],
-      ["CENTER", "Ctr"],
-      ["CENTERS", "Ctrs"],
-      ["CIRCLE", "Cir"],
-      ["CIRCLES", "Cirs"],
-      ["CLIFF", "Clf"],
-      ["CLIFFS", "Clfs"],
-      ["CLUB", "Clb"],
-      ["COMMON", "Cmn"],
-      ["COMMONS", "Cmns"],
-      ["CORNER", "Cor"],
-      ["CORNERS", "Cors"],
-      ["COURSE", "Crse"],
-      ["COURT", "Ct"],
-      ["COURTS", "Cts"],
-      ["COVE", "Cv"],
-      ["COVES", "Cvs"],
-      ["CREEK", "Crk"],
-      ["CRESCENT", "Cres"],
-      ["CREST", "Crst"],
-      ["CROSSING", "Xing"],
-      ["CROSSROAD", "Xrd"],
-      ["CROSSROADS", "Xrds"],
-      ["CURVE", "Curv"],
-      ["DALE", "Dl"],
-      ["DAM", "Dm"],
-      ["DIVIDE", "Dv"],
-      ["DRIVE", "Dr"],
-      ["DRIVES", "Drs"],
-      ["ESTATE", "Est"],
-      ["ESTATES", "Ests"],
-      ["EXPRESSWAY", "Expy"],
-      ["EXTENSION", "Ext"],
-      ["EXTENSIONS", "Exts"],
-      ["FALL", "Fall"],
-      ["FALLS", "Fls"],
-      ["FERRY", "Fry"],
-      ["FIELD", "Fld"],
-      ["FIELDS", "Flds"],
-      ["FLAT", "Flt"],
-      ["FLATS", "Flts"],
-      ["FORD", "Frd"],
-      ["FORDS", "Frds"],
-      ["FOREST", "Frst"],
-      ["FORGE", "Frg"],
-      ["FORGES", "Frgs"],
-      ["FORK", "Frk"],
-      ["FORKS", "Frks"],
-      ["FORT", "Ft"],
-      ["FREEWAY", "Fwy"],
-      ["GARDEN", "Gdn"],
-      ["GARDENS", "Gdns"],
-      ["GATEWAY", "Gtwy"],
-      ["GLEN", "Gln"],
-      ["GLENS", "Glns"],
-      ["GREEN", "Grn"],
-      ["GREENS", "Grns"],
-      ["GROVE", "Grv"],
-      ["GROVES", "Grvs"],
-      ["HARBOR", "Hbr"],
-      ["HARBORS", "Hbrs"],
-      ["HAVEN", "Hvn"],
-      ["HEIGHTS", "Hts"],
-      ["HIGHWAY", "Hwy"],
-      ["HILL", "Hl"],
-      ["HILLS", "Hls"],
-      ["HOLLOW", "Holw"],
-      ["INLET", "Inlt"],
-      ["ISLAND", "Is"],
-      ["ISLANDS", "Iss"],
-      ["ISLE", "Isle"],
-      ["JUNCTION", "Jct"],
-      ["JUNCTIONS", "Jcts"],
-      ["KEY", "Ky"],
-      ["KEYS", "Kys"],
-      ["KNOLL", "Knl"],
-      ["KNOLLS", "Knls"],
-      ["LAKE", "Lk"],
-      ["LAKES", "Lks"],
-      ["LAND", "Land"],
-      ["LANDING", "Lndg"],
-      ["LANE", "Ln"],
-      ["LIGHT", "Lgt"],
-      ["LIGHTS", "Lgts"],
-      ["LOAF", "Lf"],
-      ["LOCK", "Lck"],
-      ["LOCKS", "Lcks"],
-      ["LODGE", "Ldg"],
-      ["LOOP", "Loop"],
-      ["MALL", "Mall"],
-      ["MANOR", "Mnr"],
-      ["MANORS", "Mnrs"],
-      ["MEADOW", "Mdw"],
-      ["MEADOWS", "Mdws"],
-      ["MEWS", "Mews"],
-      ["MILL", "Ml"],
-      ["MILLS", "Mls"],
-      ["MISSION", "Msn"],
-      ["MOTORWAY", "Mtwy"],
-      ["MOUNT", "Mt"],
-      ["MOUNTAIN", "Mtn"],
-      ["MOUNTAINS", "Mtns"],
-      ["NECK", "Nck"],
-      ["ORCHARD", "Orch"],
-      ["OVAL", "Oval"],
-      ["OVERPASS", "Opas"],
-      ["PARK", "Park"],
-      ["PARKS", "Park"],
-      ["PARKWAY", "Pkwy"],
-      ["PARKWAYS", "Pkwy"],
-      ["PASS", "Pass"],
-      ["PASSAGE", "Psge"],
-      ["PATH", "Path"],
-      ["PIKE", "Pike"],
-      ["PINE", "Pne"],
-      ["PINES", "Pnes"],
-      ["PLACE", "Pl"],
-      ["PLAIN", "Pln"],
-      ["PLAINS", "Plns"],
-      ["PLAZA", "Plz"],
-      ["POINT", "Pt"],
-      ["POINTS", "Pts"],
-      ["PORT", "Prt"],
-      ["PORTS", "Prts"],
-      ["PRAIRIE", "Pr"],
-      ["RADIAL", "Radl"],
-      ["RAMP", "Ramp"],
-      ["RANCH", "Rnch"],
-      ["RAPID", "Rpd"],
-      ["RAPIDS", "Rpds"],
-      ["REST", "Rst"],
-      ["RIDGE", "Rdg"],
-      ["RIDGES", "Rdgs"],
-      ["RIVER", "Riv"],
-      ["ROAD", "Rd"],
-      ["ROADS", "Rds"],
-      ["ROUTE", "Rte"],
-      ["ROW", "Row"],
-      ["RUE", "Rue"],
-      ["RUN", "Run"],
-      ["SHOAL", "Shl"],
-      ["SHOALS", "Shls"],
-      ["SHORE", "Shr"],
-      ["SHORES", "Shrs"],
-      ["SKYWAY", "Skwy"],
-      ["SPRING", "Spg"],
-      ["SPRINGS", "Spgs"],
-      ["SPUR", "Spur"],
-      ["SPURS", "Spur"],
-      ["SQUARE", "Sq"],
-      ["SQUARES", "Sqs"],
-      ["STATION", "Sta"],
-      ["STRAVENUE", "Stra"],
-      ["STREAM", "Strm"],
-      ["STREET", "St"],
-      ["STREETS", "Sts"],
-      ["SUMMIT", "Smt"],
-      ["TERRACE", "Ter"],
-      ["THROUGHWAY", "Trwy"],
-      ["TRACE", "Trce"],
-      ["TRACK", "Trak"],
-      ["TRAFFICWAY", "Trfy"],
-      ["TRAIL", "Trl"],
-      ["TRAILER", "Trlr"],
-      ["TUNNEL", "Tunl"],
-      ["TURNPIKE", "Tpke"],
-      ["UNDERPASS", "Upas"],
-      ["UNION", "Un"],
-      ["UNIONS", "Uns"],
-      ["VALLEY", "Vly"],
-      ["VALLEYS", "Vlys"],
-      ["VIADUCT", "Via"],
-      ["VIEW", "Vw"],
-      ["VIEWS", "Vws"],
-      ["VILLAGE", "Vlg"],
-      ["VILLAGES", "Vlgs"],
-      ["VILLE", "Vl"],
-      ["VISTA", "Vis"],
-      ["WALK", "Walk"],
-      ["WALKS", "Walk"],
-      ["WAY", "Way"],
-      ["WAYS", "Ways"],
-      ["WELL", "Wl"],
-      ["WELLS", "Wls"]
-    ];
 
     const suffixMap = suffixEntries.reduce<Record<string, string>>((acc, [full, abbr]) => {
       acc[full] = abbr;
@@ -845,7 +590,7 @@ export default class Widget extends React.PureComponent<
       // Base layer URL and query endpoint
       const layerUrl = 'https://gismaps.fultoncountyga.gov/arcgispub/rest/services/Temp/GlobalSearch_Dialog/MapServer/1';
       const queryUrl = `${layerUrl}/query`;
-
+      console.log(layerUrl);
       // Fetch layer metadata to determine display field (if available)
       let displayField = 'Name';
       try {
@@ -1182,7 +927,7 @@ export default class Widget extends React.PureComponent<
     if (!this.isConfigured()) {
       return "In Widget Configuration, please select a map";
     }
-    const { loading, error, data, addressInput } = this.state;
+    const { loading, error, addressInput } = this.state;
     return (
       <div
         className="widget-use-map-view">
@@ -1190,77 +935,23 @@ export default class Widget extends React.PureComponent<
           useMapWidgetId={this.props.useMapWidgetIds?.[0]}
           onActiveViewChange={this.onActiveViewChange}
         ></JimuMapViewComponent>
-        
-        <div style={{ marginLeft: "5px", marginRight: "5px" }}>
-           {/* <h4 className="widget-title"> */}
-            <div style={{ width: "80%" }}>
-              <span className="title-text">Voter District Finder</span>
-            </div>
-            <hr style={{ color: "gray" }} />
-            
 
-          {/* </h4> */}
+        <SearchPanel
+          addressInput={addressInput}
+          hasResults={this.state.hasResults}
+          onFormSubmit={this.handleFormSubmit}
+          onAddressInputChange={this.handleAddressInputChange}
+          onSearchClick={this.handleSearchClick}
+          onClearClick={this.handleClearClick}
+        />
 
-          <form onSubmit={this.handleFormSubmit}>
-            <div className="parent">
-              <div className="child1">
-                <input
-                  className="input-text"
-                  type="text"
-                  placeholder="141 Pryor st"
-                  value={addressInput}
-                  onChange={this.handleAddressInputChange}
-                  aria-label="Enter address to search"
-                  title="Enter address to search"
-                />
-              </div>
-              <div className="child2">
-                <button
-                  className="toggle-icon"
-                  type="button"
-                  onClick={this.handleSearchClick}
-                  aria-label="Search for address"
-                  title="Search for address"
-                >
-                  Search
-                </button>
-              </div>
-              {this.state.hasResults && (
-                <div className="clearDiv">
-                  <button type="button" onClick={this.handleClearClick} aria-label="Clear search results" title="Clear search results">
-                    Clear
-                  </button>
-                </div>
-              )}
-            </div>
-          </form>
-          <hr style={{ color: "gray" }} />
-          
-        </div>
-     
-        {loading && (
-          <div style={{ textAlign: "center", margin: "8px 0" }}>
-            <img src={loadingAnimate} alt="Loading" />
-          </div>
-        )}
-        {error && <p>{error}</p>}
-       
-        <div id="resultsDiv">
-            
-      </div>
-
-        <div id="moreResultsDiv">
-              {this.state.myparcelData ? (
-                <Voterinfo
-                    parcelID={this.state.myparcelData}
-                    myYear={this.state.myyearData}
-                    key={`${this.state.myparcelData}-${this.state.myyearData}`} // Important: Add a key!
-                />
-                  ) : (
-                    <div>No parcel data yet.</div> 
-                  )
-              }
-        </div> 
+        <ResultsArea
+          loading={loading}
+          error={error}
+          loadingImageSrc={loadingAnimate}
+          myparcelData={this.state.myparcelData}
+          myyearData={this.state.myyearData}
+        />
     </div>
     );
   }
