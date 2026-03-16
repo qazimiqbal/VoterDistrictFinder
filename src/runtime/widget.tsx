@@ -10,20 +10,179 @@ import SearchPanel from "./components/SearchPanel";
 import ResultsArea from "./components/ResultsArea";
 import { suffixEntries } from "./constants/suffixEntries";
 
+// ---------------------------------------------------------------------------
+// Voterinfo component (consolidated from Voterinfo.tsx)
+// ---------------------------------------------------------------------------
+interface VoterinfoProps {
+  parcelID: string;
+}
+
+const Voterinfo = ({ parcelID }: VoterinfoProps) => {
+  const [historicData, setHistoricData] = React.useState<any>(null);
+  const [profileData, setProfileData] = React.useState<any>(null);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const fetchData = React.useCallback(async (parcel: string) => {
+    try {
+      // Pull the latest available tax record for the parcel; no year input required.
+      const queryUrl = `https://gismaps.fultoncountyga.gov/arcgispub/rest/services/PropertyMapViewer/GlobalSearch/MapServer/2/query?f=json&where=ParcelID='${parcel}'&outFields=*&orderByFields=TaxYear DESC&resultRecordCount=1`;
+      console.log("Query URL: " + queryUrl);
+      const response = await fetch(queryUrl);
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const Historicdata = await response.json();
+      if (Historicdata.features && Historicdata.features.length > 0) {
+        setHistoricData(Historicdata.features[0].attributes);
+      } else {
+        setError("No data found for the given Parcel ID.");
+      }
+
+      const zoningUrl = `https://gismaps.fultoncountyga.gov/arcgispub/rest/services/PropertyMapViewer/GlobalSearch/MapServer/3/query?f=json&where=ParcelID='${parcel}'&outFields=*`;
+      console.log("Zoning URL: " + zoningUrl);
+      const zoningResponse = await fetch(zoningUrl);
+      if (!zoningResponse.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const PropertyProfiledata = await zoningResponse.json();
+      if (PropertyProfiledata.features && PropertyProfiledata.features.length > 0) {
+        setProfileData(PropertyProfiledata.features[0].attributes);
+      } else {
+        setProfileData("No Profile data found.");
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    if (parcelID) {
+      fetchData(parcelID);
+    } else {
+      setHistoricData(null);
+      setProfileData(null);
+      setError(null);
+    }
+  }, [parcelID, fetchData]);
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!historicData || !profileData) {
+    return <div>Loading...</div>;
+  }
+
+  const getFirstValue = (source: any, keys: string[]) => {
+    for (const key of keys) {
+      const value = source?.[key];
+      if (value !== undefined && value !== null && `${value}`.trim() !== "") {
+        return value;
+      }
+    }
+    return "N/A";
+  };
+
+  return (
+    <div className="container">
+      <div className="column">
+        <div className="box">
+          <div className="header">Voting Information</div>
+          <div className="content">
+            <table>
+              <tr>
+                <td className="text-left">Parcel ID:</td>
+                <td className="text-rightcell">{historicData.ParcelID}</td>
+              </tr>
+              <tr>
+                <td className="text-left">Parcel Address:</td>
+                <td className="text-rightcell">{historicData.Situs}</td>
+              </tr>
+              <tr>
+                <td className="text-left">Owner:</td>
+                <td className="text-rightcell">{historicData.Owner}</td>
+              </tr>
+              <tr>
+                <td className="text-left">Mailing Address:</td>
+                <td className="text-rightcell">{historicData.MailAddr}</td>
+              </tr>
+              <tr>
+                <td className="text-left">County Precinct:</td>
+                <td className="text-rightcell">{getFirstValue(profileData, ["VPrecinct", "CountyPrecinct"])}</td>
+              </tr>
+              <tr>
+                <td className="text-left">County Poll:</td>
+                <td className="text-rightcell">{getFirstValue(profileData, ["VPoll", "CountyPoll"])}</td>
+              </tr>
+              <tr>
+                <td className="text-left">Muncipal Precinct:</td>
+                <td className="text-rightcell">{getFirstValue(profileData, ["MunicipalPrecinct", "MuniPrecinct", "MuncipalPrecinct"])}</td>
+              </tr>
+              <tr>
+                <td className="text-left">Muncipal Poll:</td>
+                <td className="text-rightcell">{getFirstValue(profileData, ["MunicipalPoll", "MuniPoll", "MuncipalPoll"])}</td>
+              </tr>
+              <tr>
+                <td className="text-left">Congressional District:</td>
+                <td className="text-rightcell">{profileData.CongDist}</td>
+              </tr>
+              <tr>
+                <td className="text-left">State Senate District:</td>
+                <td className="text-rightcell">{profileData.SenateDist}</td>
+              </tr>
+              <tr>
+                <td className="text-left">State House District:</td>
+                <td className="text-rightcell">{profileData.HouseDist}</td>
+              </tr>
+              <tr>
+                <td className="text-left">Commission District:</td>
+                <td className="text-rightcell">{profileData.CommDist}</td>
+              </tr>
+              <tr>
+                <td className="text-left">City Council District:</td>
+                <td className="text-rightcell">{profileData.CounclName}</td>
+              </tr>
+              {(() => {
+                const schDistFC = profileData.SchDistFC;
+                const schDistAtl = profileData.SchDistAtl;
+                const hasFC = schDistFC !== null && schDistFC !== undefined && `${schDistFC}`.trim() !== '';
+                const hasAtl = schDistAtl !== null && schDistAtl !== undefined && `${schDistAtl}`.trim() !== '';
+                if (hasFC) {
+                  return (
+                    <tr>
+                      <td className="text-left">Fulton County School Board District:</td>
+                      <td className="text-rightcell">{schDistFC}</td>
+                    </tr>
+                  );
+                } else if (hasAtl) {
+                  return (
+                    <tr>
+                      <td className="text-left">Atlanta School Board District:</td>
+                      <td className="text-rightcell">{schDistAtl}</td>
+                    </tr>
+                  );
+                }
+                return null;
+              })()}
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+// ---------------------------------------------------------------------------
+
 
 
 interface State {
-  extent: __esri.Extent;
-  parcelInfo: { Owner: string; ParcelID: string; Address: string } | null;
+  extent: __esri.Extent | null;
   isIdentifyMode: boolean;
   jimuMapView: JimuMapView | null;
   addressInput: string;
   loading: boolean;
   error: string | null;
-  data: { [key: string]: Array<{ name: string; attributes: any }> };
   myparcelData: string;
-  myyearData: number | null;
-  mapScale: number | null;
   isActive: boolean;  // ✅ Track widget active state
   hasResults: boolean; // Track if results are displayed
 }
@@ -42,16 +201,12 @@ export default class Widget extends React.PureComponent<
   
   state: State = {
     extent: null,
-    parcelInfo: null,
     isIdentifyMode: true,
     jimuMapView: null,
     addressInput: "",
     loading: false,
     error: null,
-    data: {},
     myparcelData: "",
-    myyearData: 2025,
-    mapScale: null,
     isActive: true, // ✅ Default to inactive 
     hasResults: false, // No results initially
   };
@@ -59,11 +214,11 @@ export default class Widget extends React.PureComponent<
 
 
   // This function is triggered when an address result is selected
-  // Usage: pass parcel/year data and open the full Voterinfo panel directly
-  passparcelData = (parcelID: string, myyear: number | null) => {
+  // Usage: pass parcel data and open the full Voterinfo panel directly
+  openParcelDetails = (parcelID: string) => {
     const resultsDiv = document.getElementById('resultsDiv');
     const moreResultsDiv = document.getElementById('moreResultsDiv');
-    this.setState({ myparcelData: parcelID, myyearData: myyear }, () => {
+    this.setState({ myparcelData: parcelID }, () => {
       if (resultsDiv) {
         resultsDiv.style.display = 'none';
       }
@@ -274,8 +429,6 @@ export default class Widget extends React.PureComponent<
     this.view = jimuMapView.view as __esri.MapView;
 
       if (this.view) {
-        const mapScale = jimuMapView.view.scale;
-          //console.log(mapScale);
         // Capture the initial extent only once
         if (!this.state.extent) {
           this.setState({ extent: this.view.extent.clone() }); // Store the initial extent
@@ -303,10 +456,6 @@ export default class Widget extends React.PureComponent<
       window.setTimeout(() => {
         this.syncFocusState();
       }, 0);
-      const mapScale = jimuMapView?.view?.scale;
-      if (mapScale) {
-        this.setState({ mapScale });
-      }
     });
   };
 
@@ -447,10 +596,6 @@ export default class Widget extends React.PureComponent<
       }
     }
 
-    if (this.view?.cursor && this.view.cursor.includes("crosshair")) {
-      return true;
-    }
-
     if (activeEls.length === 0) {
       return false;
     }
@@ -499,6 +644,9 @@ export default class Widget extends React.PureComponent<
   handleSearchClick = () => {
     const resultsDiv = document.getElementById('resultsDiv');
     const moreResultsDiv = document.getElementById('moreResultsDiv');
+    if (!resultsDiv || !moreResultsDiv) {
+      return;
+    }
     
     // Check if input is empty
     if (!this.state.addressInput.trim()) {
@@ -513,9 +661,9 @@ export default class Widget extends React.PureComponent<
     // Hide resultsDiv and show moreResultsDiv
     resultsDiv.style.display = 'block';
     moreResultsDiv.style.display = 'none';
-    resultsDiv.style.flex = 1;
+    resultsDiv.style.flex = '1';
 
-    this.getdataFromMapService(this.state.addressInput);
+    this.fetchAddressResults(this.state.addressInput);
   };
 
   // New clear button function
@@ -538,8 +686,6 @@ export default class Widget extends React.PureComponent<
       this.view.goTo(this.state.extent); // Use the stored initial extent
     }
     this.setState({
-      parcelInfo: null,
-      data: {},
       addressInput: "", // Clear the addressInput field
       hasResults: false // Hide Clear button
     });
@@ -577,7 +723,7 @@ export default class Widget extends React.PureComponent<
   };
 
   // New function to get data from MapService
-  getdataFromMapService = async (addressInput: string) => {
+  fetchAddressResults = async (addressInput: string) => {
     const resultsDiv = document.getElementById("resultsDiv");
     
     if (!addressInput.trim()) {
@@ -588,7 +734,7 @@ export default class Widget extends React.PureComponent<
     try {
       this.setState({ loading: true, error: null });
       // Base layer URL and query endpoint
-      const layerUrl = 'https://gismaps.fultoncountyga.gov/arcgispub/rest/services/Temp/GlobalSearch_Dialog/MapServer/1';
+      const layerUrl = 'https://gismaps.fultoncountyga.gov/arcgispub/rest/services/PropertyMapViewer/GlobalSearch/MapServer/1';
       const queryUrl = `${layerUrl}/query`;
       console.log(layerUrl);
       // Fetch layer metadata to determine display field (if available)
@@ -738,8 +884,8 @@ export default class Widget extends React.PureComponent<
       return aLower.localeCompare(bLower);
     });
 
-    const groupedHTML = sortedEntries
-      .map(([featType, items]: [string, any[]]) => {
+    const groupedHTML = (sortedEntries as Array<[string, any[]]>)
+      .map(([featType, items]) => {
         // Sort items by name, then by coordinates for deterministic order
         const sortedItems = (items as any[]).sort((a: any, b: any) => {
           const nameA = (a.name || '').toLowerCase();
@@ -866,7 +1012,7 @@ export default class Widget extends React.PureComponent<
           }
           const parcelID = result.results[0].attributes?.ParcelID;
           if (parcelID) {
-            this.passparcelData(parcelID, this.state.myyearData);
+            this.openParcelDetails(parcelID);
             this.setState({ hasResults: true });
           }
         }
@@ -898,31 +1044,7 @@ export default class Widget extends React.PureComponent<
       console.error("Zoom error:", error);
     }
   };  
-  toggleIdentifyMode = () => {
-    this.setState(
-      (prevState) => ({
-        isIdentifyMode: !prevState.isIdentifyMode,
-        parcelInfo: null,
-      }),
-      () => {
-        if (this.view) {
-          if (this.state.isIdentifyMode) {
-            this.identifyHandler = this.view.on(
-              "click",
-              this.handleMapClick as any
-            );
-          } else if (this.identifyHandler) {
-            this.identifyHandler.remove();
-            this.identifyHandler = null;
-          }
-         
-        }
-        
-      }
-    );
-  };
 
- 
   render() {
     if (!this.isConfigured()) {
       return "In Widget Configuration, please select a map";
@@ -949,9 +1071,18 @@ export default class Widget extends React.PureComponent<
           loading={loading}
           error={error}
           loadingImageSrc={loadingAnimate}
-          myparcelData={this.state.myparcelData}
-          myyearData={this.state.myyearData}
         />
+
+        <div id="moreResultsDiv" style={{ display: "none" }}>
+          {this.state.myparcelData ? (
+            <Voterinfo
+              parcelID={this.state.myparcelData}
+              key={this.state.myparcelData}
+            />
+          ) : (
+            <div>No parcel data yet.</div>
+          )}
+        </div>
     </div>
     );
   }
