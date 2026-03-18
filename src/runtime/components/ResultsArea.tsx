@@ -20,7 +20,12 @@ const ResultsArea: React.FC<ResultsAreaProps> = ({
       )}
       {error && <p>{error}</p>}
 
-      <div id="resultsDiv"></div>
+      <div
+        id="resultsDiv"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
     </>
   );
 };

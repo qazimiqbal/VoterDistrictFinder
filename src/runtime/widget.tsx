@@ -25,7 +25,7 @@ const Voterinfo = ({ parcelID }: VoterinfoProps) => {
   const fetchData = React.useCallback(async (parcel: string) => {
     try {
       // Pull the latest available tax record for the parcel; no year input required.
-      const queryUrl = `https://gismaps.fultoncountyga.gov/arcgispub/rest/services/PropertyMapViewer/GlobalSearch/MapServer/2/query?f=json&where=ParcelID='${parcel}'&outFields=*&orderByFields=TaxYear DESC&resultRecordCount=1`;
+      const queryUrl = `https://gismaps.fultoncountyga.gov/arcgispub2/rest/services/PropertyMapViewer/GlobalSearch/MapServer/2/query?f=json&where=ParcelID='${parcel}'&outFields=*&orderByFields=TaxYear DESC&resultRecordCount=1`;
       console.log("Query URL: " + queryUrl);
       const response = await fetch(queryUrl);
       if (!response.ok) {
@@ -38,7 +38,7 @@ const Voterinfo = ({ parcelID }: VoterinfoProps) => {
         setError("No data found for the given Parcel ID.");
       }
 
-      const zoningUrl = `https://gismaps.fultoncountyga.gov/arcgispub/rest/services/PropertyMapViewer/GlobalSearch/MapServer/3/query?f=json&where=ParcelID='${parcel}'&outFields=*`;
+      const zoningUrl = `https://gismaps.fultoncountyga.gov/arcgispub2/rest/services/PropertyMapViewer/GlobalSearch/MapServer/3/query?f=json&where=ParcelID='${parcel}'&outFields=*`;
       console.log("Zoning URL: " + zoningUrl);
       const zoningResponse = await fetch(zoningUrl);
       if (!zoningResponse.ok) {
@@ -734,7 +734,7 @@ export default class Widget extends React.PureComponent<
     try {
       this.setState({ loading: true, error: null });
       // Base layer URL and query endpoint
-      const layerUrl = 'https://gismaps.fultoncountyga.gov/arcgispub/rest/services/PropertyMapViewer/GlobalSearch/MapServer/1';
+      const layerUrl = 'https://gismaps.fultoncountyga.gov/arcgispub2/rest/services/PropertyMapViewer/GlobalSearch/MapServer/1';
       const queryUrl = `${layerUrl}/query`;
       console.log(layerUrl);
       // Fetch layer metadata to determine display field (if available)
@@ -1074,14 +1074,21 @@ export default class Widget extends React.PureComponent<
         />
 
         <div id="moreResultsDiv" style={{ display: "none" }}>
-          {this.state.myparcelData ? (
-            <Voterinfo
-              parcelID={this.state.myparcelData}
-              key={this.state.myparcelData}
-            />
-          ) : (
-            <div>No parcel data yet.</div>
-          )}
+          <div
+            id="parcelInfo"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {this.state.myparcelData ? (
+              <Voterinfo
+                parcelID={this.state.myparcelData}
+                key={this.state.myparcelData}
+              />
+            ) : (
+              <div>No parcel data yet.</div>
+            )}
+          </div>
         </div>
     </div>
     );
