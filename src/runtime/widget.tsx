@@ -4,7 +4,9 @@ import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis";
 import request from "@arcgis/core/request";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import { loadModules } from "esri-loader";
+// @ts-ignore static asset typing is provided at build time
 import loadingAnimate from "./images/loading_animated.gif";
+// @ts-ignore side-effect stylesheet import is resolved by widget bundler
 import "./widgets.css";
 import SearchPanel from "./components/SearchPanel";
 import ResultsArea from "./components/ResultsArea";
