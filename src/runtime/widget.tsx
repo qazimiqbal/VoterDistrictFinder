@@ -3,7 +3,9 @@ import { React, type AllWidgetProps, appActions, getAppStore, WidgetState } from
 import { JimuMapViewComponent, type JimuMapView } from "jimu-arcgis";
 import request from "@arcgis/core/request";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
-import { loadModules } from "esri-loader";
+import Graphic from "@arcgis/core/Graphic";
+import Polygon from "@arcgis/core/geometry/Polygon";
+import Point from "@arcgis/core/geometry/Point";
 // @ts-ignore static asset typing is provided at build time
 import loadingAnimate from "./images/loading_animated.gif";
 // @ts-ignore side-effect stylesheet import is resolved by widget bundler
@@ -930,11 +932,6 @@ export default class Widget extends React.PureComponent<
   zoomToCoordinates = async (x: number, y: number) => {
     console.log("Zooming to coordinates:", x, y);
     // alert("inside zoom To Coordinates");
-    const [Graphic, Polygon, Point] = await loadModules([
-      "esri/Graphic",
-      "esri/geometry/Polygon",
-      "esri/geometry/Point",
-    ]);
     const mapPoint = new Point({
       x: x,
       y: y,
